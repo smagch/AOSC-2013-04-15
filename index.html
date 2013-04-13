@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="css/reveal.min.css">
-  <link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+  <link rel="stylesheet" href="css/theme/simple.css" id="theme">
   <!-- For syntax highlighting -->
   <link rel="stylesheet" href="lib/css/zenburn.css">
   <!-- If the query includes 'print-pdf', use the PDF print sheet -->
@@ -25,15 +25,275 @@
   <div class="reveal">
     <!-- Any section element inside of this container is displayed as a slide -->
     <div class="slides">
+
       <section>
         <h2>
-          Composerによる<br>ライブラリの管理と<br>オートローダの使用
+          Composerによる<br>ライブラリの管理と<br>オートローダーの使用
         </h2>
         <h4>PHPの開発効率が飛躍的に上がる!</h4>
         <p>
           <small><a href="http://smagch.github.io">島口知也</a> / <a href="http://twitter.com/smagch">@smagch</a></small>
         </p>
       </section>
+
+      <section>
+        <section>
+          <h2>Composerって何？</h2>
+          <h3 class='fragment'><code>( ﾟдﾟ) ?</code></h3>
+          <aside class='notes'>
+            最近、PHPのユーザーの認証、セッション管理の部分を少しだけ書いた。
+            PHP歴、まだ２ヶ月ぐらいですが、変なところあったら突みお願いします。
+            実は、PHPに、Composerのような近代的なパッケージマネージャがあると
+            知らなかったので、とても面白かった。
+            パッケージマネージャとしてだけでなく、Composerのオートローダーは便利で、
+            自分でオートローダーのスクリプトを書く必要がなくとても楽。
+            逆に、Composerがないと、PHPの開発はかなり苦痛に感じていたと思う。
+          </aside>
+        </section>
+        <section>
+          <blockquote cite='http://getcomposer.org/doc/00-intro.md#introduction'>
+            Composer is a tool for dependency management in PHP. It allows you to declare the dependent libraries your project needs and it will install them in your project for you.
+          </blockquote>
+          <blockquote cite='http://getcomposer.org/doc/00-intro.md#dependency-management'>
+            Composer is not a package manager. Yes, it deals with "packages" or libraries, but it manages them on a per-project basis, installing them in a directory (e.g. <code>vendor</code>) inside your project. By default it will never install anything globally. Thus, it is a dependency manager.
+          </blockquote>
+          <small>
+            <a href='http://getcomposer.org/doc/00-intro.md'>http://getcomposer.org/doc/00-intro.md</a>
+          </small>
+        </section>
+        <section>
+          <p>パッケージマネージャじゃないって書いてるけど・・・</p>
+          <p>Dependency Manager??</p>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>composer.jsonを見てみる</h2>
+        </section>
+        <section>
+          <h3>monolog v1.4.1</h3>
+          <p><a href='https://github.com/Seldaek/monolog'>https://github.com/Seldaek/monolog</a></p>
+          <pre><code style='max-height: 600px;'>
+{
+    "name": "monolog/monolog",
+    "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
+    "keywords": ["log", "logging", "psr-3"],
+    "homepage": "http://github.com/Seldaek/monolog",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jordi Boggiano",
+            "email": "j.boggiano@seld.be",
+            "homepage": "http://seld.be"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "psr/log": "~1.0"
+    },
+    "require-dev": {
+        "mlehner/gelf-php": "1.0.*",
+        "raven/raven": "0.3.*",
+        "doctrine/couchdb": "dev-master"
+    },
+    "suggest": {
+        "mlehner/gelf-php": "Allow sending log messages to a GrayLog2 server",
+        "raven/raven": "Allow sending log messages to a Sentry server",
+        "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+        "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+        "ext-mongo": "Allow sending log messages to a MongoDB server"
+    },
+    "autoload": {
+        "psr-0": {"Monolog": "src/"}
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.4.x-dev"
+        }
+    }
+}
+          </code></pre>
+        </section>
+        <section>
+          <h3>"require"と"require-dev"に注目</h3>
+          <ul>
+            <li class='fragment'><code>"php": ">=5.3.0", </code></li>
+            <li class='fragment'><code>"psr/log": "~1.0"</code></li>
+            <li class='fragment'><code>"mlehner/gelf-php": "1.0.*"</code></li>
+            <li class='fragment'><code>"doctrine/couchdb": "dev-master"</code></li>
+            <li class='fragment'><code>( ﾟдﾟ) ?</code></li>
+          </ul>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>Semver</h2>
+          <h3>Semantic Versioning</h3>
+          <a href='http://semver.org/'>http://semver.org/</a>
+        </section>
+        <section>
+          <h2>Author</h2>
+          <figure>
+            <img alt='Tom Preston-Werner' src='https://secure.gravatar.com/avatar/25c7c18223fb42a4c6ae1c8db6f50f9b?s=400'></img>
+            <figcaption>
+              Cofounder & CEO at Github
+            </figcaption>
+          </figure>
+        </section>
+        <section>
+          <h2>バージョンナンバーの付け方のコンベンション</h2>
+        </section>
+        <section>
+          <p><code>v2.5.12</code></p>
+          <p class='fragment'><code>Major.Minor.Patch</code></p>
+          <ul>
+            <li class='fragment'>
+              <p>
+                Majorバージョンが2になってから、5回マイナーバージョンアップした。
+                マイナーバージョンアップは、後方互換性がある(Backward Compatibility)。
+                ただし、Majorバージョンが０の間は例外。
+              </p>
+            </li>
+            <li class='fragment'>
+              <p>
+                Minorバージョンが５になってから、12回パッチが当てられた
+              </p>
+            </li>
+            <li class='fragment'>
+              <p>
+                Majorバージョンアップは、後方互換がない大きなAPI変更があることがある。
+              </p>
+            </li>
+            <li class='fragment'>
+              <p>
+                詳しくは、原文を確認 <a href='http://semver.org/'>http://semver.org/</a>
+              </p>
+            </li>
+          </ul>
+        </section>
+        <section>
+          <ul>
+            <li>
+              <h5><code>"php": ">=5.3.0"</code></h5>
+              <p class='fragment'>phpのバージョンが5.3.0以上</p>
+              <br/>
+            </li>
+            <li>
+              <h5><code>"psr/log": "~1.0"</code></h5>
+              <p class='fragment'>1.0以上2.0未満</p>
+              <p><small>
+                <span class='fragment' style='color: red;'>注意!!</span>
+                <span class='fragment'>
+                  <a href='http://npmjs.org'>npm</a>だと、1.0以上1.1未満
+                  <a href='https://github.com/isaacs/node-semver'>リンク</a>
+                </span>
+              </small></p>
+            </li>
+            <li>
+              <h5><code>"mlehner/gelf-php": "1.0.*"</code></h5>
+              <p class='fragment'>1.0以上1.1未満</p>
+              <br/>
+            </li>
+            <li>
+              <h5><code>"doctrine/couchdb": "dev-master"</code></h5>
+              <p class='fragment'>
+                リリース前の<code>master</code>ブランチのソースを、レポジトリから取って来てくれる。
+              <p>
+              <small class='fragment'>それぞれのバージョンは、VCSレポジトリのタグから読んでるだけ</small>
+            </li>
+          </ul>
+          <aside class='notes'>
+            チルダ"~"の扱いが、npmと違いがあって混乱する。
+            semverは、バージョンナンバーのマッチングに関するコンベンションは含んでないので、
+            それぞれのパッケージマネージャによってチグハグ。
+          </aside>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>パッケージマネージャをつかうと、どう便利か</h2>
+        </section>
+        <section>
+          <h2>例えば、Opauthを使ったとすると・・・</h2>
+          <aside>
+            Opauthは、OAuth認証のライブラリで、Twitter、Facebook、Google+などでログインできる
+          </aside>
+          <aside class='notes'>
+            Opauthを使った経験
+          </aside>
+        </section>
+        <section>
+          <p>
+            Sterategyディレクトリの中に、
+            それぞれの認証プロバイダのライブラリをダウンロードして、置かなきゃいけない。
+          </p>
+          <img src='images/opauth-manual.png' width='500px'/>
+        </section>
+        <section>
+          <h3>composerを使うと</h3>
+          <p>composer.json</p>
+<pre><code>{
+    "require":{
+        "opauth/opauth": "*",
+        "opauth/facebook": "*",
+        "opauth/twitter": "*"
+    }
+}</code></pre>
+          <p>あとは、以下のようにコマンドするだけ</p>
+          <pre><code>
+$ composer install
+          </code></pre>
+        </section>
+        <section>
+          <p>vendorディレクトリに勝手にダウンロードしてくれる</p>
+          <img src='images/opauth-composer.png' width='400px' />
+          <aside class='notes'> 実演して、どういうふうにダウンロードされるか見る </aside>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>Composerのautoloadを使う</h2>
+          <ol>
+            <li class='fragment'>psr-0</li>
+            <li class='fragment'>classmap</li>
+            <li class='fragment'>files</li>
+          </ol>
+<pre><code>{
+  "autoload": {
+    "psr-0": {},
+    "classmap": [],
+    "files": []
+  }
+}</code></pre>
+        </section>
+        <section>
+          <h2>autoloaderって？</h2>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>PSR-0</h2>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>classmap</h2>
+        </section>
+      </section>
+
+      <section>
+        <section>
+          <h2>files</h2>
+        </section>
+      </section>
+
     </div>
   </div>
 
@@ -48,7 +308,6 @@
       progress: true,
       history: true,
       center: true,
-
       theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
       transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
 
@@ -64,8 +323,6 @@
         // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
       ]
     });
-
   </script>
-
 </body>
 </html>
