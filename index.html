@@ -10,6 +10,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="css/reveal.min.css">
   <link rel="stylesheet" href="css/theme/simple.css" id="theme">
+  <style>
+    .right-top {
+      position: absolute;
+      z-index: 2000;
+      right: 0;
+      top: 0;
+    }
+  </style>
   <!-- For syntax highlighting -->
   <link rel="stylesheet" href="lib/css/zenburn.css">
   <!-- If the query includes 'print-pdf', use the PDF print sheet -->
@@ -202,7 +210,7 @@
               <p class='fragment'>
                 リリース前の<code>master</code>ブランチのソースを、レポジトリから取って来てくれる。
               <p>
-              <small class='fragment'>それぞれのバージョンは、VCSレポジトリのタグから読んでるだけ</small>
+              <small class='fragment'>それぞれのバージョンリリースは、VCSレポジトリのタグから読んでるだけ</small>
             </li>
           </ul>
           <aside class='notes'>
@@ -236,7 +244,7 @@
         <section>
           <h3>composerを使うと</h3>
           <p>composer.json</p>
-<pre><code>{
+<pre><code contenteditable>{
     "require":{
         "opauth/opauth": "*",
         "opauth/facebook": "*",
@@ -253,38 +261,262 @@ $ composer install
           <img src='images/opauth-composer.png' width='400px' />
           <aside class='notes'> 実演して、どういうふうにダウンロードされるか見る </aside>
         </section>
+        <section>
+          <h3>composer付属のautoloaderを使う</h3>
+          <p>composer.json</p>
+<pre><code contenteditable>{
+    "require": {
+        "monolog/monolog": "~1.4",
+        "respect/rest": "~0.5.1"
+    }
+}</code></pre>
+          <p class='fragment'>
+            <code>monolog</code>と、<code>respect/rest</code>をインスコしたとして
+          </p>
+<pre class='fragment'><code contenteditable>require 'vendor/autoload.php';
+$log    = new Monolog\Logger();
+$router = new Respect\Rest\Router();
+</code></pre>
+          <p class='fragment'>
+            <code class='fragment'>require, </code> <code class='fragment'>require_once</code><br/>
+            <code class='fragment'>include, </code> <code class='fragment'>include_once</code><br/>
+            <span class='fragment'>書く必要なし！</span>
+          </p>
+          <aside class='notes'>
+            実際に、吐き出されたautoload_namespaces.phpを確認する。
+            monologを"~1.4"で、なぜrestが"~0.5.1"なのか、semverのMajorバージョン0の時のルールおさらい
+          </aside>
+        </section>
       </section>
 
       <section>
         <section>
-          <h2>Composerのautoloadを使う</h2>
-          <ol>
-            <li class='fragment'>psr-0</li>
-            <li class='fragment'>classmap</li>
-            <li class='fragment'>files</li>
-          </ol>
-<pre><code>{
+          <h2>autoloader</h2>
+          <p class='fragment'>
+            spl_autoload_register
+            <br>
+            <small>
+              <a href='http://php.net/manual/en/function.spl-autoload-register.php'>
+                http://php.net/manual/en/function.spl-autoload-register.php
+              </a>
+            </small>
+          </p>
+          <aside class='notes'>
+            PHPのレファレンスをみて、古い__autoload含め、確認
+          </aside>
+        </section>
+        <section>
+          <div class='right-top'>
+            <img src='images/autoload.png' width='300px'/>
+          </div>
+          <p>composer.json
+<pre><code contenteditable>{
+    "autoload": {
+        "psr-0": {
+            "Foo": "lib/"
+        }
+    }
+}</code></pre>
+          </p>
+          <p class='fragment'>lib/Foo.php
+<pre class='fragment'><code>class Foo { public $bar = 'foobar'; }</code></pre>
+          </p>
+          <p class='fragment'>index.php
+<pre class='fragment'><code>require 'vendor/autoload.php';
+$foo = new Foo();
+echo $foo->bar;// foobar
+</code></pre>
+          </p>
+        </section>
+        <section>
+          <h3>Composerのautoloadには、３種類ある</h3>
+<pre><code contenteditable>{
   "autoload": {
     "psr-0": {},
     "classmap": [],
     "files": []
   }
 }</code></pre>
-        </section>
-        <section>
-          <h2>autoloaderって？</h2>
+           <ol>
+            <li class='fragment'>psr-0</li>
+            <li class='fragment'>classmap</li>
+            <li class='fragment'>files</li>
+          </ol>
         </section>
       </section>
 
       <section>
         <section>
           <h2>PSR-0</h2>
+          <small><a href='https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md'>
+            https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md
+          </a></small>
+          <aside class='notes'>
+            要するに、クラス名と、ファイル名を命名する際のコンベンション
+            要するに、ネームスペース使って、ディレクトリと同じような階層にしろ。
+          </aside>
+        </section>
+        <section>
+          <div class='right-top'>
+            <img src='images/autoload2.png' width='300px'/>
+          </div>
+          <p>composer.json</p>
+<pre><code contenteditable>{
+  "autoload": {
+    "psr-0": {
+      "Utils": "lib/"
+    }
+  }
+}</code></pre>
+          <p class='fragment'>lib/Utils/Foo.php
+<pre class='fragment'><code contenteditable>namespace Utils;
+class Foo
+{
+    public function bar()
+    {
+        echo __CLASS__ . __FUNCTION__;
+    }
+}</code></pre></p>
+          <p class='fragment'>index.php</p>
+<pre class='fragment'><code contenteditable>require 'vendor/autoload.php';
+$foo = new Utils\Foo();
+$foo->bar();//Utils\Foobar
+</code></pre>
+        </section>
+        <section>
+          <h3>さっきの<code>Foo.php</code>とまとめてみる</h3>
+        </section>
+        <section>
+          <div class='right-top'>
+            <img src='images/autoload3.png' width='300px'/>
+          </div>
+          <p>composer.json</p>
+          <pre><code contenteditable>{
+    "autoload: {
+        "psr-0": {
+            "Foo": "lib/",
+            "Utils: "lib/"
+        }
+    }
+}</code></pre>
+          <p class='fragment'>もしくは、</p>
+          <pre class='fragment'><code contenteditable>{
+    "autoload": {
+        "psr-0": {
+            "": "lib/"
+        }
+    }
+}</code></pre>
+          <p class='fragment'>index.php</p>
+<pre class='fragment'><code contenteditable>require 'vendor/autoload.php';
+$foo  = new Foo();
+$foo2 = new Utils\Foo();
+</code></pre>
+          <aside class='notes'>
+            空文字のフォールバックに対して言及。
+            吐き出されたautoload_namespaces.phpを見て確認する。
+            PSR-0についての雑感、まとめ。
+            PSR-0に沿ってないライブラリを読むときどうする？
+            と問いかけ、つぎのclassmapへ移る。
+            // TODO HybridAuthの例, conditionalなスクリプトのロードが大変だということ
+            // 
+          </aside>
         </section>
       </section>
 
       <section>
         <section>
           <h2>classmap</h2>
+        </section>
+        <section>
+          <p class='fragment'>PSR-0 ?</p>
+          <br>
+          <h3 class='fragment'><code>( ﾟдﾟ)､ﾍﾟｯ</code></h3>
+          <br/>
+          <small class='fragment'>
+            <p>PSR-0スタンダードに沿わないクラス・ファイル名の命名をしていたら・・・</p>
+          </small>
+        </section>
+        <section>
+          <div class='right-top'>
+            <img src='images/autoload-foobar.png' width='300px'/> 
+          </div>
+          <p>lib/FooBar.php</p>
+          <pre><code contenteditable>class Foo {}
+class Bar {}</code></pre>
+          <p>composer.json</p>
+          <pre><code contenteditable>{
+    "autoload": {
+        "psr-0": {
+            "": "lib/"
+        }
+    }
+}</code></pre>
+          <p class='fragment'>index.php</p>
+          <pre class='fragment'><code contenteditable>require 'vendor/autoload.php';
+// $foo    = new Foo(); // Fatal Error
+// $bar    = new Bar(); // Fatal Error
+// $foobar = new Foobar(); // Fatal Error</code></pre>
+        </section>
+        <section>
+          <h3>classmapを使う</h3>
+          <div class='right-top' style='top: 100px;'>
+            <img src='images/autoload-foobar.png' width='300px'/>
+          </div>
+          <p>composer.json</p>
+          <pre><code contenteditable>{
+    "autoload": {
+        "classmap": ["lib/FooBar.php"]
+    }
+}</code></pre>
+          <p class='fragment'>index.php</p>
+          <pre class='fragment'><code contenteditable>require 'vendor/autoload.php';
+$foo = new Foo();
+echo $foo->foo; // foo
+$bar = new Bar();
+echo $bar->bar; // bar</code></pre>
+          <aside class='notes'>
+            PSR-0のときは、autoload_namespaces.phpだったが、
+            今度はautoload_classmap.phpを確認して、
+            FooとBarがマップされていることを確認する
+            PSR-0は、必ず従わなければいけないものではないと、フォローしつつ、
+            次のidiormの例に移る
+          </aside>
+        </section>
+        <section>
+          <h3>idiorm</h3>
+          <p>classmapを使っているライブラリもある</p>
+          <small>
+            <a href='https://github.com/j4mie/idiorm/blob/v1.3.0/composer.json#L39-L41'>
+              https://github.com/j4mie/idiorm/blob/v1.3.0/composer.json#L39-L41
+            </a>
+          </small>
+        </section>
+        <section>
+          <p>composer.json</p>
+          <pre><code contenteditable>{
+    "require": {
+        "j4mie/idiorm": "1.3.0"
+    }
+}</code></pre>
+          <p>vendor/composer/autoload_classmap.php</p>
+          <pre><code contenteditable>
+// autoload_classmap.php generated by Composer
+
+$vendorDir = dirname(__DIR__);
+$baseDir = dirname($vendorDir);
+
+return array(
+    'IdiormResultSet' => $baseDir . '/vendor/j4mie/idiorm/idiorm.php',
+    'IdiormString' => $baseDir . '/vendor/j4mie/idiorm/idiorm.php',
+    'IdiormStringException' => $baseDir . '/vendor/j4mie/idiorm/idiorm.php',
+    'ORM' => $baseDir . '/vendor/j4mie/idiorm/idiorm.php',
+);</code></pre>
+          <aside class='notes'>
+            autoload_real.phpを見てみる。
+            これって、名前コンフリクトしたらどうなるの？
+            教えてエロイ人。
+          </aside>
         </section>
       </section>
 
