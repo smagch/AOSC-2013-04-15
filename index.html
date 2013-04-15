@@ -287,6 +287,26 @@ $router = new Respect\Rest\Router();
             monologを"~1.4"で、なぜrestが"~0.5.1"なのか、semverのMajorバージョン0の時のルールおさらい
           </aside>
         </section>
+        <section>
+          <p>Conditionalな<code>require</code>, <code>include</code>も、オートローダーを使えば簡単
+<pre><code>require 'vendor/autoload.php';
+if (false) {
+    $log = new Monolog\Logger();
+}
+// Monolog\Loggerは読み込まれない
+</code></pre> 
+        </section>
+        <section>
+          <p>HybridAuthのメソッド内の<code>require_once</code></p>
+          <p><small><a href='https://github.com/hybridauth/hybridauth/blob/v2.0.10/hybridauth/Hybrid/Auth.php#L96-L112'>
+            https://github.com/hybridauth/hybridauth/blob/v2.0.10/hybridauth/Hybrid/Auth.php#L96-L112
+          </a></small></p>
+          <p class='fragment'>autoloderを使っていないため、<br>モジュール管理が複雑化している</p>
+          <aside class='notes'>
+            HybridAuth v3.0からは、PSR-0ネームスペースに沿っていて、独自のautoloaderも実装されている
+            autoloder, PSR-0がベストプラクティスとして定着してる（？）
+          </aside>
+        </section>
       </section>
 
       <section>
@@ -303,6 +323,10 @@ $router = new Respect\Rest\Router();
           </p>
           <aside class='notes'>
             PHPのレファレンスをみて、古い__autoload含め、確認
+            set_include_pathにも言及
+            http://php.net/manual/en/function.set-include-path.php
+            autoloderは、自分で実装できるが、composerのautoloderを使うと、
+            jsonを設定するだけで簡単なので、楽をしましょう。
           </aside>
         </section>
         <section>
@@ -442,8 +466,14 @@ $foo2 = new Utils\Foo();
             <img src='images/autoload-foobar.png' width='300px'/> 
           </div>
           <p>lib/FooBar.php</p>
-          <pre><code contenteditable>class Foo {}
-class Bar {}</code></pre>
+          <pre><code contenteditable>class Foo
+{
+    public $foo = 'foo';
+}
+class Bar
+{
+    public $bar = 'bar';
+}</code></pre>
           <p>composer.json</p>
           <pre><code contenteditable>{
     "autoload": {
@@ -479,6 +509,7 @@ echo $bar->bar; // bar</code></pre>
             PSR-0のときは、autoload_namespaces.phpだったが、
             今度はautoload_classmap.phpを確認して、
             FooとBarがマップされていることを確認する
+            あと、ディレクトリ名を指定してもいい（実際にcomposer.jsonを書き換える）
             PSR-0は、必ず従わなければいけないものではないと、フォローしつつ、
             次のidiormの例に移る
           </aside>
@@ -523,6 +554,31 @@ return array(
       <section>
         <section>
           <h2>files</h2>
+          <p class='fragment'><code>vendor/autoload.php</code>を読む時<code>require</code>してくれる
+          <p class='fragment'><small>アプリケーション全体にわたって使われるグローバルな変数・関数に使うと便利</small></p>
+        </section>
+        <section>
+          <p>composer.json <small>公式サイトの例</small></p>
+          <pre><code contenteditable>{
+    "autoload": {
+        "files": ["src/MyLibrary/functions.php"]
+    }
+}</code></pre>
+        </section>
+        <section>
+          <p>composer.json</p>
+          <pre><code contenteditable>{
+    "autoload": {
+        "files": ["lib/MySQLSessionHandler.php"]
+    }
+}</code></pre>
+          <p><a href='http://php.net/manual/en/class.sessionhandler.php'>セッションハンドラー</a>を
+          独自に実装している時とかもいいかも</p>
+          <aside class='notes'>
+            session handlerは、redisとか、memcachedが多いと思とおもうが、
+            単なる例として・・・
+            実際に、requireされているのを、autoload_real.phpを見て確認する。
+          </aside>
         </section>
       </section>
 
