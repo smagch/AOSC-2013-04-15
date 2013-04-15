@@ -442,11 +442,20 @@ $foo2 = new Utils\Foo();
             PSR-0についての雑感、まとめ。
             PSR-0に沿ってないライブラリを読むときどうする？
             と問いかけ、つぎのclassmapへ移る。
-            // TODO HybridAuthの例, conditionalなスクリプトのロードが大変だということ
-            // 
           </aside>
         </section>
-      </section>
+        <section>
+          <p>aliasつかう</a>
+        <pre><code contenteditable>require 'vendor/autoload.php';
+use Respect\Validation\Validator as v;
+use Utils\Validators\UserValidator;
+$ok = v::numeric()->validate(100);
+$ok = UserValidator::validate(array( 'name' => 'hoge' ));</code></pre>
+          <aside class='notes'>
+            ネームスペースがあった場合、aliasがあったほうが、"\"を入れなくていいので、
+            useを使ったほうがいいと、PDO、PDOExceptionなどを例に書き込んでみる
+        </section>
+     </section>
 
       <section>
         <section>
@@ -582,6 +591,12 @@ return array(
         </section>
       </section>
 
+      <section>
+        <p>詳しくは、Composer公式ページで確認</p>
+        <p><small><a href='http://getcomposer.org/'>http://getcomposer.org/</a></small></p>
+        <p>パッケージは、Packagistで検索</p>
+        <p><small><a href='https://packagist.org/'>https://packagist.org/<a><small></p>
+      </section>
     </div>
   </div>
 
@@ -602,10 +617,10 @@ return array(
       // Optional libraries used to extend on reveal.js
       dependencies: [
         { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-        { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-        { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        // { src: 'plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+        // { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
         { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-        { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+        // { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
         { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
         // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
         // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
